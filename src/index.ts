@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 
 // @snowpack - can't destructure directly on import commonjs
-const { Engine, World, Render, Bodies, Query } = Matter;
+const { Engine, World, Render, Bodies } = Matter;
 
 import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types/index';
 
@@ -14,6 +14,7 @@ import {
   moveBody,
   getAllBodies,
   getRealPosition,
+  targetBody,
 } from './move';
 
 import { saveStateToStorage, loadStateFromStorage, makeState } from './state';
@@ -59,8 +60,8 @@ function onKeyUp(e: KeyboardEvent) {
     b: () => {
       const body = bodyGenerators.rectangle(
         'editortime',
-        processSnapPosition(mousePosition.x, SNAP_STEP),
-        processSnapPosition(mousePosition.y, SNAP_STEP),
+        processSnapPosition(mousePosition.x, e.shiftKey ? SNAP_STEP : false),
+        processSnapPosition(mousePosition.y, e.shiftKey ? SNAP_STEP : false),
       );
       // @todo only change current body
       World.add(engine.world, body);
@@ -69,8 +70,8 @@ function onKeyUp(e: KeyboardEvent) {
     c: () => {
       const body = bodyGenerators.circle(
         'editortime',
-        processSnapPosition(mousePosition.x, SNAP_STEP),
-        processSnapPosition(mousePosition.y, SNAP_STEP),
+        processSnapPosition(mousePosition.x, e.shiftKey ? SNAP_STEP : false),
+        processSnapPosition(mousePosition.y, e.shiftKey ? SNAP_STEP : false),
       );
       // @todo only change current body
       World.add(engine.world, body);
@@ -91,13 +92,8 @@ render.canvas.addEventListener('mousedown', (e) => {
   if (gameMode === 'runtime') {
     return;
   }
-  const bodies = getAllBodies(engine.world);
-  const clickedBodies = Query.point(
-    bodies,
-    getRealPosition(e, render.canvas),
-  ) as EnhanceBody[];
-  if (clickedBodies.length) {
-    selected = clickedBodies[0];
+  selected = targetBody(engine.world, getRealPosition(e, render.canvas));
+  if (selected) {
     selectBody(selected, true);
     startMoveBody(selected, selected.position.x, selected.position.y);
   }

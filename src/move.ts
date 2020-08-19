@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 
 // @snowpack - can't destructure directly on import commonjs
-const { Composite, Body } = Matter;
+const { Composite, Body, Query } = Matter;
 
 import type { EnhanceBody } from './@types';
 
@@ -13,7 +13,10 @@ export const selectBody = (body: EnhanceBody, selected: boolean) => {
   }
 };
 
-export const processSnapPosition = (position: number, step: number) => {
+export const processSnapPosition = (position: number, step: number | false) => {
+  if (!step || step <= 0) {
+    return position;
+  }
   const rest = position % step;
   return position - rest + step / 2;
 };
@@ -56,3 +59,15 @@ export function getRealPosition(e: MouseEvent, elem: HTMLCanvasElement) {
   const y = e.clientY - rect.top;
   return { x, y };
 }
+
+export const targetBody = (
+  world: Matter.World,
+  realPosition: { x: number; y: number },
+) => {
+  const bodies = getAllBodies(world);
+  const clickedBodies = Query.point(bodies, realPosition) as EnhanceBody[];
+  if (clickedBodies.length > 0) {
+    return clickedBodies[0];
+  }
+  return null;
+};
