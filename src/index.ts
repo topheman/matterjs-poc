@@ -58,6 +58,9 @@ function onKeyUp(e: KeyboardEvent) {
   type KeyFuncMapType = 'b' | 'c' | 'e' | 'r';
   const keyFuncMap: { [K in KeyFuncMapType]: () => void } = {
     b: () => {
+      if (gameMode === 'runtime') {
+        return;
+      }
       const body = bodyGenerators.rectangle(
         'editortime',
         processSnapPosition(mousePosition.x, e.shiftKey ? SNAP_STEP : false),
@@ -68,6 +71,9 @@ function onKeyUp(e: KeyboardEvent) {
       state = makeState(getAllBodies(engine.world));
     },
     c: () => {
+      if (gameMode === 'runtime') {
+        return;
+      }
       const body = bodyGenerators.circle(
         'editortime',
         processSnapPosition(mousePosition.x, e.shiftKey ? SNAP_STEP : false),
@@ -128,6 +134,7 @@ render.canvas.addEventListener('mousemove', (e) => {
     state = makeState(getAllBodies(engine.world));
     console.log(state);
   }
+  // @todo move view
 });
 
 function cleanupWorld() {
