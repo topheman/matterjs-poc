@@ -1,13 +1,7 @@
-import {
-  Engine,
-  World,
-  Render,
-  Bodies,
-  Query,
-  Composite,
-  Body,
-  IChamferableBodyDefinition,
-} from 'matter-js';
+import Matter from 'matter-js';
+
+// @snowpack - can't destructure directly on import commonjs
+const { Engine, World, Render, Bodies, Query, Composite, Body } = Matter;
 
 // @todo abstract this part + dont forget to cleanup DOM + requestAnimationFrame
 
@@ -15,7 +9,8 @@ type GameModeType = 'runtime' | 'editortime';
 
 type ShapeType = 'rectangle' | 'circle';
 
-type BodyOptions = IChamferableBodyDefinition;
+// @snowpack - can't import and assign as value type
+type BodyOptions = Matter.IChamferableBodyDefinition;
 
 type BodyMetaInfos = {
   type: ShapeType;
@@ -24,7 +19,7 @@ type BodyMetaInfos = {
   previousPosition: { x: number; y: number }; // keep track of original position for drag and drop
 };
 
-interface EnhanceBody extends Body {
+interface EnhanceBody extends Matter.Body {
   meta: BodyMetaInfos;
 }
 
@@ -113,7 +108,7 @@ const moveBody = (
   // note for futur : return state to take in account
 };
 
-const getAllBodies = (world: World) => {
+const getAllBodies = (world: Matter.World) => {
   const bodies = Composite.allBodies(world) as EnhanceBody[];
   return bodies.filter((body) => body.meta);
 };
