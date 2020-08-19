@@ -25,7 +25,7 @@ let gameMode: GameModeType = 'editortime';
 
 let state: BodyMetaInfos[] = [];
 
-const canvasElm = document.querySelector<HTMLCanvasElement>('#root');
+const rootElm = document.querySelector<HTMLDivElement>('#root');
 const saveButtonElm = document.querySelector<HTMLButtonElement>('#save');
 const reloadButtonElm = document.querySelector<HTMLButtonElement>('#reload');
 const editortimeElm = document.querySelector<HTMLButtonElement>(
@@ -33,13 +33,13 @@ const editortimeElm = document.querySelector<HTMLButtonElement>(
 );
 const runtimeElm = document.querySelector<HTMLButtonElement>('#runtime-mode');
 
-console.log(canvasElm);
+console.log(rootElm);
 // create an engine
 var engine = Engine.create();
 
 // create a renderer
 var render = Render.create({
-  element: canvasElm!,
+  element: rootElm!,
   engine: engine,
   options: {
     width: window.innerWidth,
@@ -98,7 +98,16 @@ render.canvas.addEventListener('mousedown', (e) => {
   if (gameMode === 'runtime') {
     return;
   }
-  selected = targetBody(engine.world, getRealPosition(e, render.canvas));
+  selected = targetBody(
+    engine.world,
+    getRealPosition(e, render.canvas, {
+      bounds: render.bounds,
+      originalSize: {
+        width: render.options.width!,
+        height: render.options.height!,
+      },
+    }),
+  );
   if (selected) {
     selectBody(selected, true);
     startMoveBody(selected, selected.position.x, selected.position.y);
@@ -122,7 +131,13 @@ render.canvas.addEventListener('mousemove', (e) => {
   if (gameMode === 'runtime') {
     return;
   }
-  mousePosition = getRealPosition(e, render.canvas);
+  mousePosition = getRealPosition(e, render.canvas, {
+    bounds: render.bounds,
+    originalSize: {
+      width: render.options.width!,
+      height: render.options.height!,
+    },
+  });
   if (selected) {
     moveBody(
       selected,
@@ -143,14 +158,14 @@ function cleanupWorld() {
 
 function manageMouseOver(gameMode: GameModeType) {
   console.log('manageMouseOver');
-  if (canvasElm) {
+  if (rootElm) {
     if (gameMode === 'runtime') {
-      canvasElm.style.cursor = 'not-allowed';
-      console.log(canvasElm);
+      rootElm.style.cursor = 'not-allowed';
+      console.log(rootElm);
     } else {
-      canvasElm.style.cursor = 'default';
+      rootElm.style.cursor = 'default';
     }
-    console.log('canvasElm', canvasElm);
+    console.log('rootElm', rootElm);
   }
 }
 
@@ -222,3 +237,22 @@ initEditortime(state);
 Engine.run(engine);
 // run the renderer
 Render.run(render);
+
+const ZOOM_VELOCITY = 0.15;
+
+rootElm?.addEventListener('wheel', (e) => {
+  console.log('wheel', e.deltaY, render);
+  // @todo add type
+  Render.lookAt(render, {
+    bounds: {
+      min: {
+        x: render.bounds.min.x + ZOOM_VELOCITY * e.deltaY,
+        y: render.bounds.min.y + ZOOM_VELOCITY * e.deltaY,
+      },
+      max: {
+        x: render.bounds.max.x - ZOOM_VELOCITY * e.deltaY,
+        y: render.bounds.max.y - ZOOM_VELOCITY * e.deltaY,
+      },
+    },
+  });
+});

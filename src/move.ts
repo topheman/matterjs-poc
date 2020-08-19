@@ -53,11 +53,30 @@ export const getAllBodies = (world: Matter.World) => {
   return bodies.filter((body) => body.meta);
 };
 
-export function getRealPosition(e: MouseEvent, elem: HTMLCanvasElement) {
+export function getRealPosition(
+  e: MouseEvent,
+  elem: HTMLCanvasElement,
+  options?: {
+    bounds: Matter.Bounds;
+    originalSize: { width: number; height: number };
+  },
+) {
   const rect = elem.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  return { x, y };
+  const realX = e.clientX - rect.left;
+  const realY = e.clientY - rect.top;
+  if (options) {
+    const computedWidth = options.bounds.max.x - options.bounds.min.x;
+    const computedHeight = options.bounds.max.y - options.bounds.min.y;
+    return {
+      x:
+        (computedWidth / options.originalSize.width) * realX +
+        options.bounds.min.x,
+      y:
+        (computedHeight / options.originalSize.height) * realY +
+        options.bounds.min.y,
+    };
+  }
+  return { x: realX, y: realY };
 }
 
 export const targetBody = (
