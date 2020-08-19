@@ -4,7 +4,8 @@
     "build": "snowpack build",
     "test": "echo \"This template does not include a test runner by default.\" && exit 1",
     "format": "prettier --write \"src/**/*.{ts,js}\"",
-    "lint": "prettier --check \"src/**/*.{ts,js}\""
+    "lint": "prettier --check \"src/**/*.{ts,js}\"",
+    "serve": "serve ./build -l 8081"
   },
   "dependencies": {
     "canvas-confetti": "^1.2.0"
@@ -14,6 +15,7 @@
     "@types/canvas-confetti": "^1.0.0",
     "@types/snowpack-env": "^2.3.0",
     "prettier": "^2.0.5",
+    "serve": "^11.3.2",
     "snowpack": "^2.8.0",
     "typescript": "^3.9.7"
   }
