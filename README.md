@@ -1,4 +1,4 @@
-# New Project
+# MatterJS-poc - a simple editor
 
 > ✨ Bootstrapped with Create Snowpack App (CSA).
 

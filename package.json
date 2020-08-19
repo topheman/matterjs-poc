@@ -8,11 +8,11 @@
     "serve": "serve ./build -l 8081"
   },
   "dependencies": {
-    "canvas-confetti": "^1.2.0"
+    "matter-js": "^0.14.2"
   },
   "devDependencies": {
     "@snowpack/plugin-run-script": "^2.1.0",
-    "@types/canvas-confetti": "^1.0.0",
+    "@types/matter-js": "^0.14.5",
     "@types/snowpack-env": "^2.3.0",
     "prettier": "^2.0.5",
     "serve": "^11.3.2",
