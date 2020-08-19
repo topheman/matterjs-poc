@@ -1,11 +1,11 @@
 import Matter from 'matter-js';
 
 // @snowpack - can't destructure directly on import commonjs
-const { Engine, World, Render, Bodies } = Matter;
+const { Engine, World, Render } = Matter;
 
-import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types/index';
+import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types';
 
-import { bodyGenerators } from './build';
+import { bodyGenerators, makeGround } from './build';
 
 import {
   selectBody,
@@ -164,7 +164,7 @@ const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => {
   setGameMode(mode);
   manageMouseOver(gameMode);
   cleanupWorld();
-  var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+  const ground = makeGround(window.innerWidth, window.innerHeight);
   // add all of the bodies to the world
   const bodies = stateCb().map((bodyInfo) => {
     return bodyGenerators[bodyInfo.type](
@@ -173,9 +173,7 @@ const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => {
       bodyInfo.initialPosition.y,
     );
   });
-
-  // @todo
-  World.add(engine.world, [ground, ...bodies]);
+  World.add(engine.world, [...ground, ...bodies]);
 };
 
 function initEditortime(state: BodyMetaInfos[]) {

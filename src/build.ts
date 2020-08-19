@@ -8,7 +8,7 @@ import type {
   GameModeType,
   BodyOptions,
   EnhanceBody,
-} from './@types/index';
+} from './@types';
 
 const bodyFactory = (shapeType: ShapeType) => (...rest: number[]) => (
   x: number,
@@ -45,4 +45,37 @@ export const bodyGenerators = {
       restitution: 0.9,
       render: { fillStyle: '#900000' },
     }),
+};
+
+export const makeGround = (screenWidth: number, screenHeight: number) => {
+  console.log({ screenWidth, screenHeight });
+  const top = Bodies.rectangle(screenWidth / 2, 0, screenWidth, 5, {
+    isStatic: true,
+    render: { fillStyle: '#900000' },
+  });
+  const bottom = Bodies.rectangle(
+    screenWidth / 2,
+    screenHeight - 1,
+    screenWidth,
+    5,
+    {
+      isStatic: true,
+      render: { fillStyle: '#900000' },
+    },
+  );
+  const left = Bodies.rectangle(0, screenHeight / 2, 5, screenHeight, {
+    isStatic: true,
+    render: { fillStyle: '#900000' },
+  });
+  const right = Bodies.rectangle(
+    screenWidth - 1,
+    screenHeight / 2,
+    5,
+    screenHeight,
+    {
+      isStatic: true,
+      render: { fillStyle: '#900000' },
+    },
+  );
+  return [left, bottom, top, right];
 };
