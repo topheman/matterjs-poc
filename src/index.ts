@@ -151,6 +151,10 @@ function getRealPosition(e: MouseEvent, elem: HTMLCanvasElement) {
 const canvasElm = document.querySelector<HTMLCanvasElement>('#root');
 const saveButtonElm = document.querySelector<HTMLButtonElement>('#save');
 const reloadButtonElm = document.querySelector<HTMLButtonElement>('#reload');
+const editortimeElm = document.querySelector<HTMLButtonElement>(
+  '#editortime-mode',
+);
+const runtimeElm = document.querySelector<HTMLButtonElement>('#runtime-mode');
 
 console.log(canvasElm);
 // create an engine
@@ -162,7 +166,7 @@ var render = Render.create({
   engine: engine,
   options: {
     width: window.innerWidth,
-    height: 600,
+    height: window.innerHeight,
     wireframes: false,
   },
 });
@@ -303,12 +307,19 @@ const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => {
 };
 
 function initEditortime(state: BodyMetaInfos[]) {
+  runtimeElm?.classList.remove('active');
+  editortimeElm?.classList.add('active');
   init('editortime')(() => state);
 }
 
 function initRuntime(state: BodyMetaInfos[]) {
+  editortimeElm?.classList.remove('active');
+  runtimeElm?.classList.add('active');
   init('runtime')(() => state);
 }
+
+editortimeElm?.addEventListener('click', () => initEditortime(state), false);
+runtimeElm?.addEventListener('click', () => initRuntime(state), false);
 
 function save() {
   if (gameMode !== 'editortime') {
