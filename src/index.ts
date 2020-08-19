@@ -1,152 +1,28 @@
 import Matter from 'matter-js';
 
 // @snowpack - can't destructure directly on import commonjs
-const { Engine, World, Render, Bodies, Query, Composite, Body } = Matter;
+const { Engine, World, Render, Bodies, Query } = Matter;
 
-// @todo abstract this part + dont forget to cleanup DOM + requestAnimationFrame
+import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types/index';
 
-type GameModeType = 'runtime' | 'editortime';
+import { bodyGenerators } from './build';
 
-type ShapeType = 'rectangle' | 'circle';
+import {
+  selectBody,
+  processSnapPosition,
+  startMoveBody,
+  moveBody,
+  getAllBodies,
+  getRealPosition,
+} from './move';
 
-// @snowpack - can't import and assign as value type
-type BodyOptions = Matter.IChamferableBodyDefinition;
-
-type BodyMetaInfos = {
-  type: ShapeType;
-  constructorParams: number[];
-  initialPosition: { x: number; y: number }; // position to be serialized
-  previousPosition: { x: number; y: number }; // keep track of original position for drag and drop
-};
-
-interface EnhanceBody extends Matter.Body {
-  meta: BodyMetaInfos;
-}
+import { saveStateToStorage, loadStateFromStorage, makeState } from './state';
 
 const SNAP_STEP = 20;
-
-const STORAGE_KEY = 'MATTER_JS_BASIC_EDITOR_2';
 
 let gameMode: GameModeType = 'editortime';
 
 let state: BodyMetaInfos[] = [];
-
-const bodyFactory = (shapeType: ShapeType) => (...rest: number[]) => (
-  x: number,
-  y: number,
-  bodyOptions: BodyOptions,
-): EnhanceBody => {
-  // @ts-ignore
-  const body = Bodies[shapeType](x, y, ...rest, bodyOptions) as EnhanceBody;
-  // will be serialized
-  body.meta = {
-    type: shapeType,
-    initialPosition: {
-      x,
-      y,
-    },
-    constructorParams: [...rest],
-    previousPosition: {
-      x,
-      y,
-    },
-  };
-  return body;
-};
-
-const bodyGenerators = {
-  rectangle: (mode: GameModeType, x: number, y: number) =>
-    bodyFactory('rectangle')(40, 40)(x, y, {
-      isStatic: true,
-      render: { fillStyle: '#900000' },
-    }),
-  circle: (mode: GameModeType, x: number, y: number) =>
-    bodyFactory('circle')(20)(x, y, {
-      isStatic: mode === 'editortime' ? true : false,
-      restitution: 0.9,
-      render: { fillStyle: '#900000' },
-    }),
-};
-
-const selectBody = (body: EnhanceBody, selected: boolean) => {
-  if (selected) {
-    body.render.opacity = 0.5;
-  } else {
-    body.render.opacity = 1;
-  }
-};
-
-const processSnapPosition = (position: number, step: number) => {
-  const rest = position % step;
-  return position - rest + step / 2;
-};
-
-// @todo manage collisions
-const startMoveBody = (body: EnhanceBody, x: number, y: number) => {
-  body.meta.previousPosition = {
-    x,
-    y,
-  };
-};
-
-const moveBody = (
-  body: EnhanceBody,
-  x: number,
-  y: number,
-  snapStep: number | false,
-) => {
-  const newX = snapStep ? processSnapPosition(x, snapStep) : x;
-  const newY = snapStep ? processSnapPosition(y, snapStep) : y;
-  Body.setPosition(body, {
-    x: newX,
-    y: newY,
-  });
-  body.meta.initialPosition = {
-    x: newX,
-    y: newY,
-  };
-  // note for futur : return state to take in account
-};
-
-const getAllBodies = (world: Matter.World) => {
-  const bodies = Composite.allBodies(world) as EnhanceBody[];
-  return bodies.filter((body) => body.meta);
-};
-
-const saveStateToStorage = (state: BodyMetaInfos[]): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {
-    console.error("Couldn't save state to storage", e.message);
-  }
-};
-
-const loadStateFromStorage = (): BodyMetaInfos[] => {
-  try {
-    return JSON.parse(
-      localStorage.getItem(STORAGE_KEY) as string,
-    ) as BodyMetaInfos[];
-  } catch (e) {
-    console.error("Couldn't load state from storage", e.message);
-  }
-  return [];
-};
-
-const makeState = (bodies: EnhanceBody[]): BodyMetaInfos[] => {
-  return bodies.map((body) => {
-    return {
-      ...body.meta,
-      position: body.position,
-    };
-  });
-};
-
-function getRealPosition(e: MouseEvent, elem: HTMLCanvasElement) {
-  const rect = elem.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  return { x, y };
-}
 
 const canvasElm = document.querySelector<HTMLCanvasElement>('#root');
 const saveButtonElm = document.querySelector<HTMLButtonElement>('#save');
