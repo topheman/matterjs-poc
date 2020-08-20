@@ -48,7 +48,6 @@ export const bodyGenerators = {
 };
 
 export const makeGround = (screenWidth: number, screenHeight: number) => {
-  console.log({ screenWidth, screenHeight });
   const top = Bodies.rectangle(screenWidth / 2, 0, screenWidth, 5, {
     isStatic: true,
     render: { fillStyle: '#900000' },

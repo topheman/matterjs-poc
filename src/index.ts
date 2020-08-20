@@ -5,7 +5,12 @@ const { Engine, World, Render } = Matter;
 
 import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types';
 
-import { getAllBodies, targetBody, getRealPosition } from './view';
+import {
+  getAllBodies,
+  targetBody,
+  getRealPosition,
+  translateVector,
+} from './view';
 
 import { bodyGenerators, makeGround } from './build';
 
@@ -52,7 +57,6 @@ let selected: EnhanceBody | null = null;
 let selectedViewport: boolean = false;
 
 // track mouse position
-let previousMousePosition = { x: 0, y: 0 };
 let mousePosition = { x: 0, y: 0 };
 
 function onKeyUp(e: KeyboardEvent) {
@@ -119,6 +123,7 @@ render.canvas.addEventListener('mousedown', (e) => {
 
 render.canvas.addEventListener('mouseup', (e) => {
   console.log('selected', selected);
+  console.log(state);
   if (selected) {
     selectBody(selected, false);
   }
@@ -137,11 +142,19 @@ render.canvas.addEventListener('mousemove', (e) => {
   });
   // move viewport
   if (selectedViewport) {
-    let delta = {
-      x: -e.movementX,
-      y: -e.movementY,
-    };
-    console.log(delta, mousePosition, previousMousePosition);
+    let delta = translateVector(
+      {
+        x: -e.movementX,
+        y: -e.movementY,
+      },
+      {
+        bounds: render.bounds,
+        originalSize: {
+          width: render.options.width!,
+          height: render.options.height!,
+        },
+      },
+    );
     // @ts-ignore
     Render.lookAt(render, {
       bounds: {
@@ -166,9 +179,7 @@ render.canvas.addEventListener('mousemove', (e) => {
     );
     // @todo only change current body
     state = makeState(getAllBodies(engine.world));
-    console.log(state);
   }
-  previousMousePosition = mousePosition;
 });
 
 function cleanupWorld() {
@@ -260,7 +271,6 @@ Render.run(render);
 const ZOOM_VELOCITY = 0.15;
 
 rootElm?.addEventListener('wheel', (e) => {
-  console.log('wheel', e.deltaY, render);
   // @ts-ignore
   Render.lookAt(render, {
     bounds: {
