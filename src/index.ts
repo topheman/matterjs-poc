@@ -268,19 +268,19 @@ Engine.run(engine);
 // run the renderer
 Render.run(render);
 
-const ZOOM_VELOCITY = 0.15;
+const ZOOM_VELOCITY = 0.23;
 
 rootElm?.addEventListener('wheel', (e) => {
   // @ts-ignore
   Render.lookAt(render, {
     bounds: {
       min: {
-        x: render.bounds.min.x + ZOOM_VELOCITY * e.deltaY,
-        y: render.bounds.min.y + ZOOM_VELOCITY * e.deltaY,
+        x: render.bounds.min.x - ZOOM_VELOCITY * e.deltaY,
+        y: render.bounds.min.y - ZOOM_VELOCITY * e.deltaY,
       },
       max: {
-        x: render.bounds.max.x - ZOOM_VELOCITY * e.deltaY,
-        y: render.bounds.max.y - ZOOM_VELOCITY * e.deltaY,
+        x: render.bounds.max.x + ZOOM_VELOCITY * e.deltaY,
+        y: render.bounds.max.y + ZOOM_VELOCITY * e.deltaY,
       },
     },
   });
