@@ -10,6 +10,7 @@ import {
   targetBody,
   getRealPosition,
   translateVector,
+  safeViewportBounds,
 } from './view';
 
 import { bodyGenerators, makeGround } from './build';
@@ -28,6 +29,9 @@ const SNAP_STEP = 20;
 let gameMode: GameModeType = 'editortime';
 
 let state: BodyMetaInfos[] = [];
+
+const levelWidth = window.innerWidth * 1.5;
+const levelHeight = window.innerHeight * 1.2;
 
 const rootElm = document.querySelector<HTMLDivElement>('#root');
 const saveButtonElm = document.querySelector<HTMLButtonElement>('#save');
@@ -157,16 +161,21 @@ render.canvas.addEventListener('mousemove', (e) => {
     );
     // @ts-ignore
     Render.lookAt(render, {
-      bounds: {
-        min: {
-          x: render.bounds.min.x + delta.x,
-          y: render.bounds.min.y + delta.y,
+      bounds: safeViewportBounds(
+        {
+          min: {
+            x: delta.x,
+            y: delta.y,
+          },
+          max: {
+            x: delta.x,
+            y: delta.y,
+          },
         },
-        max: {
-          x: render.bounds.max.x + delta.x,
-          y: render.bounds.max.y + delta.y,
-        },
-      },
+        render.bounds,
+        levelWidth,
+        levelHeight,
+      ),
     });
   }
   // move selected body
@@ -216,7 +225,7 @@ const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => {
   setGameMode(mode);
   manageMouseOver(gameMode);
   cleanupWorld();
-  const ground = makeGround(window.innerWidth, window.innerHeight);
+  const ground = makeGround(levelWidth, levelHeight);
   // add all of the bodies to the world
   const bodies = stateCb().map((bodyInfo) => {
     return bodyGenerators[bodyInfo.type](
@@ -273,15 +282,20 @@ const ZOOM_VELOCITY = 0.23;
 rootElm?.addEventListener('wheel', (e) => {
   // @ts-ignore
   Render.lookAt(render, {
-    bounds: {
-      min: {
-        x: render.bounds.min.x - ZOOM_VELOCITY * e.deltaY,
-        y: render.bounds.min.y - ZOOM_VELOCITY * e.deltaY,
+    bounds: safeViewportBounds(
+      {
+        min: {
+          x: -ZOOM_VELOCITY * e.deltaY,
+          y: -ZOOM_VELOCITY * e.deltaY,
+        },
+        max: {
+          x: ZOOM_VELOCITY * e.deltaY,
+          y: ZOOM_VELOCITY * e.deltaY,
+        },
       },
-      max: {
-        x: render.bounds.max.x + ZOOM_VELOCITY * e.deltaY,
-        y: render.bounds.max.y + ZOOM_VELOCITY * e.deltaY,
-      },
-    },
+      render.bounds,
+      levelWidth,
+      levelHeight,
+    ),
   });
 });

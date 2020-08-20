@@ -64,3 +64,38 @@ export const targetBody = (
   }
   return null;
 };
+
+export const safeViewportBounds = (
+  delta: Matter.Bounds,
+  originalBounds: Matter.Bounds,
+  levelWidth: number,
+  levelHeight: number,
+) => {
+  const left = originalBounds.min.x + delta.min.x < 0;
+  const top = originalBounds.min.y + delta.min.y < 0;
+  const right = originalBounds.max.x + delta.max.x > levelWidth;
+  const bottom = originalBounds.max.y + delta.max.y > levelHeight;
+  console.log({ top, right, bottom, left });
+  // return same bounds if we are in a corner
+  if (
+    (left && top) ||
+    (top && right) ||
+    (right && bottom) ||
+    (bottom && left)
+  ) {
+    return originalBounds;
+  }
+  // add delta
+  const result = {
+    min: {
+      x: left && !right ? 0 : originalBounds.min.x + delta.min.x,
+      y: top && !bottom ? 0 : originalBounds.min.y + delta.min.y,
+    },
+    max: {
+      x: right && !left ? levelWidth : originalBounds.max.x + delta.max.x,
+      y: bottom && !top ? levelHeight : originalBounds.max.y + delta.max.y,
+    },
+  };
+  // console.log(result);
+  return result;
+};
