@@ -5,6 +5,8 @@ const { Engine, World, Render } = Matter;
 
 import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types';
 
+import { getAllBodies, targetBody, getRealPosition } from './view';
+
 import { bodyGenerators, makeGround } from './build';
 
 import {
@@ -12,9 +14,6 @@ import {
   processSnapPosition,
   startMoveBody,
   moveBody,
-  getAllBodies,
-  getRealPosition,
-  targetBody,
 } from './move';
 
 import { saveStateToStorage, loadStateFromStorage, makeState } from './state';
@@ -50,8 +49,10 @@ var render = Render.create({
 
 // track selected body
 let selected: EnhanceBody | null = null;
+let selectedViewport: boolean = false;
 
 // track mouse position
+let previousMousePosition = { x: 0, y: 0 };
 let mousePosition = { x: 0, y: 0 };
 
 function onKeyUp(e: KeyboardEvent) {
@@ -95,42 +96,38 @@ function onKeyUp(e: KeyboardEvent) {
 window.addEventListener('keyup', onKeyUp);
 
 render.canvas.addEventListener('mousedown', (e) => {
-  if (gameMode === 'runtime') {
-    return;
+  if (gameMode !== 'runtime') {
+    selected = targetBody(
+      engine.world,
+      getRealPosition(e, render.canvas, {
+        bounds: render.bounds,
+        originalSize: {
+          width: render.options.width!,
+          height: render.options.height!,
+        },
+      }),
+    );
   }
-  selected = targetBody(
-    engine.world,
-    getRealPosition(e, render.canvas, {
-      bounds: render.bounds,
-      originalSize: {
-        width: render.options.width!,
-        height: render.options.height!,
-      },
-    }),
-  );
   if (selected) {
     selectBody(selected, true);
     startMoveBody(selected, selected.position.x, selected.position.y);
+  } else {
+    selectedViewport = true;
   }
   console.log('selected', selected);
 });
 
 render.canvas.addEventListener('mouseup', (e) => {
-  if (gameMode === 'runtime') {
-    return;
-  }
   console.log('selected', selected);
   if (selected) {
     selectBody(selected, false);
   }
   selected = null;
+  selectedViewport = false;
   console.log('mouseup');
 });
 
 render.canvas.addEventListener('mousemove', (e) => {
-  if (gameMode === 'runtime') {
-    return;
-  }
   mousePosition = getRealPosition(e, render.canvas, {
     bounds: render.bounds,
     originalSize: {
@@ -138,7 +135,29 @@ render.canvas.addEventListener('mousemove', (e) => {
       height: render.options.height!,
     },
   });
-  if (selected) {
+  // move viewport
+  if (selectedViewport) {
+    let delta = {
+      x: -e.movementX,
+      y: -e.movementY,
+    };
+    console.log(delta, mousePosition, previousMousePosition);
+    // @ts-ignore
+    Render.lookAt(render, {
+      bounds: {
+        min: {
+          x: render.bounds.min.x + delta.x,
+          y: render.bounds.min.y + delta.y,
+        },
+        max: {
+          x: render.bounds.max.x + delta.x,
+          y: render.bounds.max.y + delta.y,
+        },
+      },
+    });
+  }
+  // move selected body
+  if (selected && gameMode !== 'runtime') {
     moveBody(
       selected,
       mousePosition.x,
@@ -149,7 +168,7 @@ render.canvas.addEventListener('mousemove', (e) => {
     state = makeState(getAllBodies(engine.world));
     console.log(state);
   }
-  // @todo move view
+  previousMousePosition = mousePosition;
 });
 
 function cleanupWorld() {
@@ -242,7 +261,7 @@ const ZOOM_VELOCITY = 0.15;
 
 rootElm?.addEventListener('wheel', (e) => {
   console.log('wheel', e.deltaY, render);
-  // @todo add type
+  // @ts-ignore
   Render.lookAt(render, {
     bounds: {
       min: {
