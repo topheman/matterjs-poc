@@ -125,7 +125,7 @@ render.canvas.addEventListener('mousedown', (e) => {
   console.log('selected', selected);
 });
 
-render.canvas.addEventListener('mouseup', (e) => {
+const makeOnMouseend = (mode: 'mouseup' | 'mouseout') => (e: MouseEvent) => {
   console.log('selected', selected);
   console.log(state);
   if (selected) {
@@ -133,8 +133,12 @@ render.canvas.addEventListener('mouseup', (e) => {
   }
   selected = null;
   selectedViewport = false;
-  console.log('mouseup');
-});
+  console.log(mode);
+};
+
+render.canvas.addEventListener('mouseup', makeOnMouseend('mouseup'));
+
+render.canvas.addEventListener('mouseout', makeOnMouseend('mouseout'));
 
 render.canvas.addEventListener('mousemove', (e) => {
   mousePosition = getRealPosition(e, render.canvas, {
