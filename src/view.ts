@@ -5,9 +5,33 @@ const { Query, Composite } = Matter;
 
 import type { EnhanceBody } from './@types';
 
-export const getAllBodies = (world: Matter.World) => {
+type MatterCollision = {
+  collided: boolean;
+  bodyA: EnhanceBody;
+  bodyB: EnhanceBody;
+};
+
+export const getAllBodies = (
+  world: Matter.World,
+  minusBodies: EnhanceBody[] = [],
+) => {
   const bodies = Composite.allBodies(world) as EnhanceBody[];
-  return bodies.filter((body) => body.meta);
+  let result = bodies.filter((body) => body.meta);
+  if (minusBodies.length > 0) {
+    const minusBodiesId = minusBodies.map((body) => body.id);
+    result = result.filter((body) => !minusBodiesId.includes(body.id));
+  }
+  return result;
+};
+
+export const collides = (body: EnhanceBody, world: Matter.World) => {
+  const collisions = Query.collides(
+    body,
+    getAllBodies(world, [body]),
+  ) as MatterCollision[];
+  return collisions.map((collision) => {
+    return collision.bodyA.id !== body.id ? collision.bodyA : collision.bodyB;
+  });
 };
 
 type TranslateVectorOptions = {
@@ -75,7 +99,6 @@ export const safeViewportBounds = (
   const top = originalBounds.min.y + delta.min.y < 0;
   const right = originalBounds.max.x + delta.max.x > levelWidth;
   const bottom = originalBounds.max.y + delta.max.y > levelHeight;
-  console.log({ top, right, bottom, left });
   // return same bounds if we are in a corner
   if (
     (left && top) ||

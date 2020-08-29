@@ -29,6 +29,13 @@ export const startMoveBody = (body: EnhanceBody, x: number, y: number) => {
   };
 };
 
+export const moveToPreviousPosition = (body: EnhanceBody) => {
+  Body.setPosition(body, {
+    x: body.meta.previousPosition.x,
+    y: body.meta.previousPosition.y,
+  });
+};
+
 export const moveBody = (
   body: EnhanceBody,
   x: number,

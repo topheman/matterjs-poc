@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 
 // @snowpack - can't destructure directly on import commonjs
-const { Engine, World, Render } = Matter;
+const { Engine, World, Render, Events } = Matter;
 
 import type { GameModeType, BodyMetaInfos, EnhanceBody } from './@types';
 
@@ -11,6 +11,7 @@ import {
   getRealPosition,
   translateVector,
   safeViewportBounds,
+  collides,
 } from './view';
 
 import { bodyGenerators, makeGround } from './build';
@@ -19,6 +20,7 @@ import {
   selectBody,
   processSnapPosition,
   startMoveBody,
+  moveToPreviousPosition,
   moveBody,
 } from './move';
 
@@ -58,6 +60,11 @@ var render = Render.create({
 
 // track selected body
 let selected: EnhanceBody | null = null;
+
+// track bodies colliding while dragging `selected`
+let bodiesCollidingWhileDragging: EnhanceBody[] = [];
+
+// track if user is panning viewport
 let selectedViewport: boolean = false;
 
 // track mouse position
@@ -130,6 +137,10 @@ const makeOnMouseend = (mode: 'mouseup' | 'mouseout') => (e: MouseEvent) => {
   console.log(state);
   if (selected) {
     selectBody(selected, false);
+    if (bodiesCollidingWhileDragging.length > 0) {
+      moveToPreviousPosition(selected);
+      bodiesCollidingWhileDragging = [];
+    }
   }
   selected = null;
   selectedViewport = false;
@@ -190,6 +201,7 @@ render.canvas.addEventListener('mousemove', (e) => {
       mousePosition.y,
       e.shiftKey ? SNAP_STEP : false,
     );
+    bodiesCollidingWhileDragging = collides(selected, engine.world);
     // @todo only change current body
     state = makeState(getAllBodies(engine.world));
   }
@@ -225,7 +237,15 @@ function setGameMode(mode: GameModeType) {
   }
 }
 
-const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => {
+function tagColligingBodies(mode: 'tag' | 'cleanup', bodies: EnhanceBody[]) {
+  bodies.forEach((body) => {
+    body.render.opacity = mode === 'tag' ? 0.3 : 1;
+  });
+}
+
+const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => (
+  prepareCb?: (mode: GameModeType) => void,
+) => {
   setGameMode(mode);
   manageMouseOver(gameMode);
   cleanupWorld();
@@ -239,18 +259,29 @@ const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => {
     );
   });
   World.add(engine.world, [...ground, ...bodies]);
+  if (prepareCb) {
+    prepareCb(mode);
+  }
 };
 
 function initEditortime(state: BodyMetaInfos[]) {
   runtimeElm?.classList.remove('active');
   editortimeElm?.classList.add('active');
-  init('editortime')(() => state);
+  init('editortime')(() => state)(() => {
+    // manage paint of colliding objects while dragging
+    Events.on(render, 'beforeRender', () => {
+      tagColligingBodies('tag', bodiesCollidingWhileDragging);
+    });
+    Events.on(render, 'afterRender', () => {
+      tagColligingBodies('cleanup', bodiesCollidingWhileDragging);
+    });
+  });
 }
 
 function initRuntime(state: BodyMetaInfos[]) {
   editortimeElm?.classList.remove('active');
   runtimeElm?.classList.add('active');
-  init('runtime')(() => state);
+  init('runtime')(() => state)();
 }
 
 editortimeElm?.addEventListener('click', () => initEditortime(state), false);
