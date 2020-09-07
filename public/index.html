@@ -14,8 +14,50 @@
       <button id="runtime-mode" aria-keyshortcuts="R">run (R)</button>
       <button id="save">save</button>
       <button id="reload">reload</button>
+      <button id="help">help (H)</button>
     </div>
     <div id="root"></div>
+    <div class="help-modal" id="help-modal">
+      <div class="help-modal-content">
+        <span class="close" id="close-btn">&times;</span>
+        <h1>MatterJS-poc</h1>
+        <p>
+          The goal of this project is to make a poc of a game where you would
+          have:
+        </p>
+        <ul>
+          <li>An editor mode to position bricks and balls</li>
+          <li>A runtime mode to see them fall</li>
+        </ul>
+        <p>
+          The physics part is based
+          <a href="https://brm.io/matter-js/">matter-js</a>, a 2D JavaScript
+          physics engine.
+        </p>
+        <p>
+          The source code is written in TypeScript and transpiled with
+          <a href="https://www.snowpack.dev">snowpack</a>, a new lightweight
+          bundler for development (this poc was the occasion of testing it).
+        </p>
+        <hr />
+        <p>Use the following keys:</p>
+        <ul>
+          <li>
+            <strong>E</strong>: switch to editor mode
+            <ul>
+              <li><strong>B</strong>: add a block on mouse position</li>
+              <li><strong>C</strong>: add a circle on mouse position</li>
+              <li><strong>shift+move a piece</strong>: follow magnetic grid</li>
+            </ul>
+          </li>
+          <li><strong>R</strong>: switch to runtime mode</li>
+          <li><strong>H</strong>: show/hide Help</li>
+        </ul>
+        <p>You can zoom in/out with the mouse wheel.</p>
+        <p>You can move the viewport.</p>
+        <p>Use the save/reload buttons to keep your work between reloading.</p>
+      </div>
+    </div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <script type="module" src="/_dist_/index.js"></script>
     <!--

@@ -71,7 +71,7 @@ let selectedViewport: boolean = false;
 let mousePosition = { x: 0, y: 0 };
 
 function onKeyUp(e: KeyboardEvent) {
-  type KeyFuncMapType = 'b' | 'c' | 'e' | 'r';
+  type KeyFuncMapType = 'b' | 'c' | 'e' | 'r' | 'h';
   const keyFuncMap: { [K in KeyFuncMapType]: () => void } = {
     b: () => {
       if (gameMode === 'runtime') {
@@ -101,6 +101,7 @@ function onKeyUp(e: KeyboardEvent) {
     },
     e: () => initEditortime(state),
     r: () => initRuntime(state),
+    h: () => switchHelp(),
   };
   console.log(e);
   keyFuncMap[e.key.toLocaleLowerCase() as KeyFuncMapType] &&
@@ -334,3 +335,48 @@ rootElm?.addEventListener('wheel', (e) => {
     ),
   });
 });
+
+/** help modal */
+
+// Get the modal
+const modalElm = document.getElementById('help-modal');
+
+// Get the button that opens the modal
+const switchHelpElm = document.getElementById('help');
+
+// Get the <span> element that closes the modal
+const closeHelpElm = document.getElementById('close-btn');
+
+function switchHelp(forceClose = false) {
+  const previousState = modalElm!.style.display;
+  if (forceClose) {
+    modalElm!.style.display = 'none';
+  }
+  modalElm!.style.display = previousState === 'none' ? 'block' : 'none';
+}
+
+window?.addEventListener(
+  'click',
+  (e) => {
+    if (e.target === modalElm) {
+      switchHelp(true);
+    }
+  },
+  false,
+);
+
+switchHelpElm?.addEventListener(
+  'click',
+  () => {
+    switchHelp();
+  },
+  false,
+);
+
+closeHelpElm?.addEventListener(
+  'click',
+  () => {
+    switchHelp(true);
+  },
+  false,
+);

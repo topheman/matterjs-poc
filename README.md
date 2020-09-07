@@ -1,24 +1,30 @@
 # MatterJS-poc - a simple editor
 
-> ✨ Bootstrapped with Create Snowpack App (CSA).
+The goal of this project is to make a poc of a game where you would have:
 
-## Available Scripts
+- An editor mode to position bricks and balls
+- A runtime mode to see them fall
 
-### npm start
+The physics part is based on [matter-js](https://brm.io/matter-js/). The source code is written in TypeScript and transpiled with [snowpack](https://www.snowpack.dev), a new lightweight bundler for development (this poc was the occasion of testing it).
 
-Runs the app in the development mode.
-Open http://localhost:8080 to view it in the browser.
+You can read the [snowpack generated README](README.snowpack.md).
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+## Install
 
-### npm run build
+```sh
+yarn
+```
 
-Builds a static copy of your site to the `build/` folder.
-Your app is ready to be deployed!
+You may also use `npm`
 
-**For the best production performance:** Add a build bundler plugin like "@snowpack/plugin-webpack" or "@snowpack/plugin-parcel" to your `snowpack.config.json` config file.
+## Run
 
-### Q: What about Eject?
+```sh
+npm start
+```
 
-No eject needed! Snowpack guarantees zero lock-in, and CSA strives for the same.
+## Build
+
+```sh
+npm run build
+```
