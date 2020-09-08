@@ -12,6 +12,7 @@ import {
   translateVector,
   safeViewportBounds,
   collides,
+  zoomedOutViewportBounds,
 } from './view';
 
 import { bodyGenerators, makeGround } from './build';
@@ -32,8 +33,8 @@ let gameMode: GameModeType = 'editortime';
 
 let state: BodyMetaInfos[] = [];
 
-const levelWidth = window.innerWidth * 1.5;
-const levelHeight = window.innerHeight * 1.2;
+const levelWidth = 2200;
+const levelHeight = 1200;
 
 const rootElm = document.querySelector<HTMLDivElement>('#root');
 const saveButtonElm = document.querySelector<HTMLButtonElement>('#save');
@@ -263,6 +264,12 @@ const init = (mode: GameModeType) => (stateCb: () => BodyMetaInfos[]) => (
   if (prepareCb) {
     prepareCb(mode);
   }
+  const zoomedOutBounds = zoomedOutViewportBounds(
+    { width: levelWidth, height: levelHeight },
+    { width: render.options.width!, height: render.options.height! },
+  );
+  // @ts-ignore
+  Render.lookAt(render, { bounds: zoomedOutBounds });
 };
 
 function initEditortime(state: BodyMetaInfos[]) {

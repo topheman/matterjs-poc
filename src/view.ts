@@ -122,3 +122,37 @@ export const safeViewportBounds = (
   // console.log(result);
   return result;
 };
+
+type WidthHeightType = { width: number; height: number };
+
+export const zoomedOutViewportBounds = (
+  level: WidthHeightType,
+  viewport: WidthHeightType,
+): Matter.Bounds => {
+  console.log(
+    'width',
+    level.width,
+    viewport.width,
+    'height',
+    level.height,
+    viewport.height,
+  );
+  const levelRatio = level.width / level.height;
+  const viewportRatio = viewport.width / viewport.height;
+  const result: Matter.Bounds = { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } };
+  if (levelRatio >= viewportRatio) {
+    result.min.x = 0;
+    result.max.x = level.width;
+    const rest = (level.height - viewport.height) / 2;
+    result.min.y = -rest;
+    result.max.y = rest + level.height;
+  } else {
+    result.min.y = 0;
+    result.max.y = level.height;
+    const rest = (level.width - viewport.width) / 2;
+    result.min.x = -rest;
+    result.max.x = rest + level.width;
+  }
+  console.log(result);
+  return result;
+};
