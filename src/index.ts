@@ -39,6 +39,7 @@ const levelHeight = 1200;
 const rootElm = document.querySelector<HTMLDivElement>('#root');
 const saveButtonElm = document.querySelector<HTMLButtonElement>('#save');
 const reloadButtonElm = document.querySelector<HTMLButtonElement>('#reload');
+const cleanupButtonElm = document.querySelector<HTMLButtonElement>('#cleanup');
 const editortimeElm = document.querySelector<HTMLButtonElement>(
   '#editortime-mode',
 );
@@ -311,8 +312,18 @@ function reload() {
   }
 }
 
+function cleanup() {
+  state = [];
+  if (gameMode === 'editortime') {
+    initEditortime(state);
+  } else {
+    initRuntime(state);
+  }
+}
+
 saveButtonElm?.addEventListener('click', save, false);
 reloadButtonElm?.addEventListener('click', reload, false);
+cleanupButtonElm?.addEventListener('click', cleanup, false);
 
 initEditortime(state);
 // run the engine
