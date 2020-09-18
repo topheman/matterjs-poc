@@ -1,5 +1,7 @@
 # MatterJS-poc - a simple editor
 
+[![Demo](https://img.shields.io/badge/demo-online-blue.svg)](https://matterjs-poc.surge.sh)
+
 The goal of this project is to make a poc of a game where you would have:
 
 - An editor mode to position bricks and balls
